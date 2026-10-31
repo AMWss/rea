@@ -9,6 +9,10 @@ on:
       - '.github/workflows/h5frida-rootless-build.yml'
   workflow_dispatch:
 
+concurrency:
+  group: h5frida-rootless-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -39,6 +43,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/theos/sdks"
           sdk="$(xcrun --sdk iphoneos --show-sdk-path)"
           ln -s "$sdk" "$RUNNER_TEMP/theos/sdks/$(basename "$sdk")"
+          brew install ldid
+          command -v ldid
           echo "THEOS=$RUNNER_TEMP/theos" >> "$GITHUB_ENV"
           echo "THEOS_PACKAGE_SCHEME=rootless" >> "$GITHUB_ENV"
 
