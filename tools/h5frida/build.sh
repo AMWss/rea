@@ -49,11 +49,12 @@ echo "::endgroup::"
 
 echo "::group::Collect dylib, if built"
 find "$PROJECT/.theos" -type f -name 'h5frida.dylib' -print | while read -r dylib; do
-  cp "$dylib" "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-UNSIGNED.dylib"
+  cp "$dylib" "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib"
 done
-if [ -f "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-UNSIGNED.dylib" ]; then
-  file "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-UNSIGNED.dylib"
-  otool -L "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-UNSIGNED.dylib" || true
+if [ -f "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib" ]; then
+  file "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib"
+  otool -L "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib" || true
+  codesign -dv --verbose=2 "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib" 2>&1 || true
 else
   echo "No compiled dylib located; see build.log" >&2
   exit 1
