@@ -22,7 +22,7 @@ for tool in sh curl dpkg dpkg-query sudo ldid codesign frida-server h5frida-setu
 done
 section "Frida installed packages"
 if has dpkg-query; then
-  dpkg-query -W -f='\''${Package} ${Version} ${Architecture}\n'\'' '*frida*' 2>&1 || true
+  dpkg-query -W -f='${Package} ${Version} ${Architecture}\n' '*frida*' 2>&1 || true
 else
   printf 'dpkg-query unavailable\n'
 fi
