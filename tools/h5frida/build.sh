@@ -42,6 +42,7 @@ make -C "$PROJECT" clean THEOS_PACKAGE_SCHEME=rootless \
 make -C "$PROJECT" -j2 THEOS_PACKAGE_SCHEME=rootless \
     TARGET=iphone:clang:latest:15.0 ARCHS=arm64 \
     h5frida_FRAMEWORKS="Foundation UIKit JavaScriptCore" \
+    h5frida_CCFLAGS="-fobjc-arc -fvisibility=hidden -std=c++11 -fno-modules -Wno-error=vla-cxx-extension" \
     2>&1 | tee "$GITHUB_WORKSPACE/build-results/build.log"
 echo "::endgroup::"
 
