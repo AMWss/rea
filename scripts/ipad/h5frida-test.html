@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>H5GG h5frida 越狱模式测试</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#101821;color:#edf3fa;padding:18px;line-height:1.55}button{background:#3285ef;border:0;color:#fff;font-size:16px;font-weight:600;border-radius:9px;padding:12px 18px}pre{white-space:pre-wrap;word-break:break-word;background:#202c3c;border-radius:9px;padding:14px;min-height:80px}small{color:#b4c7d7}</style>
+</head><body>
+<h2>h5frida 越狱模式诊断</h2>
+<p>适用于 Dopamine Rootless + 独立 H5GG App。只加载 h5frida 插件，不调用 loadGadget、不附加进程、不修改内存。</p>
+<button id="test">测试插件与进程枚举</button>
+<pre id="out">点击按钮开始测试。</pre>
+<small>结果仅显示在本地页面，不会上传。</small>
+<script>
+(function(){
+ const output=document.getElementById("out");
+ const button=document.getElementById("test");
+ const lines=[];
+ function print(x){lines.push(String(x));output.textContent=lines.join("\n");}
+ button.addEventListener("click",function(){
+  lines.length=0;
+  button.disabled=true;
+  try{
+   print("环境：独立 H5GG + 越狱 Frida Server 模式");
+   if(typeof h5gg==="undefined") throw new Error("此页面不在 H5GG 环境中运行");
+   h5gg.require(7.9);
+   print("H5GG API: OK");
+   const plugin=h5gg.loadPlugin("h5frida","h5frida-15.1.24.dylib");
+   if(!plugin) throw new Error("loadPlugin 返回空：检查签名、插件兼容和 H5GG.app 路径");
+   print("h5frida loadPlugin: OK");
+   try{print("插件版本: "+plugin.pluginVersion());}catch(e){print("插件版本读取失败: "+e);}
+   try{print("Frida 核心版本: "+plugin.coreVersion());}catch(e){print("核心版本读取失败: "+e);}
+   print("调用 enumerate_processes()（不加载 Gadget）...");
+   const processes=plugin.enumerate_processes();
+   if(!Array.isArray(processes)){
+    print("枚举返回值类型: "+Object.prototype.toString.call(processes));
+    print("枚举返回值: "+String(processes));
+   } else {
+    print("进程数量: "+processes.length);
+    processes.slice(0,15).forEach((p,i)=>print((i+1)+": "+p.pid+" "+p.name));
+    if(!processes.length) print("服务端未返回进程。检查版本、启动状态、权限及端口。");
+   }
+  }catch(e){print("错误: "+(e&&e.stack||e));}
+  finally{button.disabled=false;}
+ });
+})();
+</script></body></html>
