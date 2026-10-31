@@ -31,12 +31,12 @@
    try{print("Frida 核心版本: "+plugin.coreVersion());}catch(e){print("核心版本读取失败: "+e);}
    print("调用 enumerate_processes()（不加载 Gadget）...");
    const processes=plugin.enumerate_processes();
-   if(!Array.isArray(processes)){
+   if(!processes || typeof processes.length!=="number"){
     print("枚举返回值类型: "+Object.prototype.toString.call(processes));
     print("枚举返回值: "+String(processes));
    } else {
     print("进程数量: "+processes.length);
-    processes.slice(0,15).forEach((p,i)=>print((i+1)+": "+p.pid+" "+p.name));
+    for(let i=0;i<Math.min(15,processes.length);i++){ const p=processes[i]; print((i+1)+": "+p.pid+" "+p.name); }
     if(!processes.length) print("服务端未返回进程。检查版本、启动状态、权限及端口。");
    }
   }catch(e){print("错误: "+(e&&e.stack||e));}
