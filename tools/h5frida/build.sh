@@ -24,6 +24,7 @@ test -n "$CORE_HEADER" && test -n "$CORE_LIB" || {
 cp "$CORE_HEADER" "$PROJECT/frida-core-15.1.24.h"
 cp "$CORE_LIB" "$PROJECT/libfrida-core-15.1.24.a"
 /usr/bin/sed -i '' 's/FRIDA_CORE_VERSION  "15.1.24"/FRIDA_CORE_VERSION  "17.25.0"/' "$PROJECT/version.h"
+python3 "$GITHUB_WORKSPACE/tools/h5frida/patch_diagnostics.py" "$PROJECT/h5frida.mm"
 
 echo "::group::Source and toolchain verification"
 echo "THEOS=$THEOS"
@@ -48,9 +49,13 @@ make -C "$PROJECT" -j2 THEOS_PACKAGE_SCHEME=rootless \
 echo "::endgroup::"
 
 echo "::group::Collect dylib, if built"
-find "$PROJECT/.theos" -type f -name 'h5frida.dylib' -print | while read -r dylib; do
-  cp "$dylib" "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib"
-done
+SIGNED_OUTPUT="$PROJECT/.theos/obj/debug/h5frida.dylib"
+if [ ! -f "$SIGNED_OUTPUT" ]; then
+  echo "Expected signed Theos dylib missing: $SIGNED_OUTPUT" >&2
+  find "$PROJECT/.theos/obj" -type f -name 'h5frida.dylib' -print
+  exit 1
+fi
+cp "$SIGNED_OUTPUT" "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib"
 if [ -f "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib" ]; then
   file "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib"
   otool -L "$GITHUB_WORKSPACE/build-results/h5frida17-rootless-EXPERIMENTAL.dylib" || true
